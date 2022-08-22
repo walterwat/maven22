@@ -1,0 +1,20 @@
+node() {
+    stage('Continuous Download') {
+        git branch: 'main', url: 'https://github.com/Praveen7608/Maven22.git'
+    }
+    stage('Continuous Build') {
+        sh 'mvn package'
+    }
+    stage('Continuous Deployment') {
+        deploy adapters: [tomcat9(credentialsId: 'f3a368c3-8a7c-41ea-b2d2-f70206af14e4', path: '', url: 'http://172.31.18.159:8080')], contextPath: 'testapp', war: '**/*.war'     
+    }
+    stage('Continuous Testing') {
+        git branch: 'main', url: 'https://github.com/Praveen7608/TestScripts22.git'
+        sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline/testing.jar'
+    }
+    stage('Continuous Delivery') {
+        input message: 'waiting for the Delivery Manager Approval', submitter: 'john'
+        deploy adapters: [tomcat9(credentialsId: 'f3a368c3-8a7c-41ea-b2d2-f70206af14e4', path: '', url: 'http://172.31.27.54:8080')], contextPath: 'prodapp', war: '**/*.war'
+    }
+    
+}
